@@ -1,21 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+
+import React,{useEffect, useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native';
+
+import MapaPrincipal from   './src/pages/MapaPrincipal';
+import Login from './src/pages/Login';
+import  TelaAdicaoDeMarcadorSD from './src/pages/TelaAdicaoDeMarcadorSD'
+import TelaAdicaoDeMarcadorCTO from './src/pages/TelaAdicaoDeMarcadorCTO'
+
+console.disableYellowBox = true;
+
+const Stack = createStackNavigator();
+
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+  return (     
+    <NavigationContainer>
+      <Stack.Navigator>       
+        <Stack.Screen options={{headerShown : false}} name="MapaPrincipal" component={MapaPrincipal}/>
+        <Stack.Screen options={{headerShown : false}} name="TelaAdicaoDeMarcadorSD" component={TelaAdicaoDeMarcadorSD}/>
+        <Stack.Screen options={{headerShown : false}} name="TelaAdicaoDeMarcadorCTO" component={TelaAdicaoDeMarcadorCTO}/>
+        <Stack.Screen options={{headerShown : false}} name="Login" component={Login}/>
+      </Stack.Navigator>
+    </NavigationContainer>   
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
