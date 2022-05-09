@@ -2,7 +2,15 @@ import React,{  useContext, useEffect, useState, useRef }  from 'react'
 import { StyleSheet,  View, Text, FlatList, TextInput, Modal, Keyboard,  Pressable, ActivityIndicator, TouchableOpacity} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'
 
-import firebase from '../api/firebase';
+import firebase ,
+{
+    _ApiPesquisarGrupoPeloNome,
+    _ApiPesquisarSdsPeloIdDoGrupoPai,
+    _ApiPesquisarSdPeloNome,
+    _ApiPesquisarCTOsPeloIdDoSdPai,
+    _ApiPesquisarCtoEspecifica
+} from '../api/firebase';
+
 import { color } from 'react-native/Libraries/Components/View/ReactNativeStyleAttributes';
 
 export default function ModalPesquisarMarcadores(props) {
@@ -50,8 +58,8 @@ function pesquisarGrupo(query){
     
     setCarregandoPesquisaSDs(true)
     setSdSelecionado(null)
-    firebase.firestore().collection("grupos").where("nome", "==", query).limit(1).get()
-        .then((queryGrupo) =>{
+    _ApiPesquisarGrupoPeloNome(query)
+       .then((queryGrupo) =>{
            // var listaGrupo = []
             var grupo = {}
             queryGrupo.forEach((doc) => {               
@@ -61,8 +69,8 @@ function pesquisarGrupo(query){
             })
             setGrupoSelecionado(grupo)
             //setResultadoDaPesquisaDeSDs(listaSD)
-            firebase.firestore().collection("ceos").where("id_grupo_pai", "==", grupo.id).get()
-            .then((queryCEOs) =>{
+            _ApiPesquisarSdsPeloIdDoGrupoPai(grupo.id) 
+                .then((queryCEOs) =>{
                 var listaCEOs = []
                 queryCEOs.forEach((doc) => {               
                     var ceo = doc.data()
@@ -87,7 +95,7 @@ function pesquisarSD(query){
     setSdSelecionado(null)
     setResultadoDaPesquisaDeSDs([])
     setResultadoDaPesquisaDeCTOs([])
-    firebase.firestore().collection("ceos").where("nome", "==", query).limit(1).get()
+    _ApiPesquisarSdPeloNome(query)
         .then((querySD) =>{
             var listaSD = []
             var sd = {}
@@ -98,8 +106,8 @@ function pesquisarSD(query){
             })
             setSdSelecionado(sd)
             setResultadoDaPesquisaDeSDs(listaSD)
-            firebase.firestore().collection("ctos").where("id_sd_pai", "==", sd.id).get()
-            .then((queryCTOs) =>{
+            _ApiPesquisarCTOsPeloIdDoSdPai(sd.id)
+                .then((queryCTOs) =>{
                 var listaCTOs = []
                 queryCTOs.forEach((doc) => {               
                     var cto = doc.data()
@@ -122,7 +130,7 @@ function pesquisarCTO(query){
     setResultadoDaPesquisaDeSDs([])
     setResultadoDaPesquisaDeCTOs([])
     const idents = query.split('-')
-    firebase.firestore().collection("ceos").where("nome", "==", idents[0] + '-' + idents[1]).limit(1).get()
+    _ApiPesquisarSdPeloNome(idents[0] + '-' + idents[1])
         .then((querySD) =>{
             var listaSD = []
             var sd = {}
@@ -133,7 +141,7 @@ function pesquisarCTO(query){
             })
             setSdSelecionado(sd)
             setResultadoDaPesquisaDeSDs(listaSD)
-            firebase.firestore().collection("ctos").where("id_sd_pai", "==", sd.id).where("nome", "==", query).get()
+            _ApiPesquisarCtoEspecifica(sd.id, query)
             .then((queryCTO) =>{
                 var listaCTO = []
                 queryCTO.forEach((doc) => {               
@@ -207,7 +215,7 @@ function renderItemDaPesquisa({item}){
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function pesquisarCTOsDoSDPeloId(marcador_pai){
     setCarregandoPesquisaCTOs(true)
-    firebase.firestore().collection("ctos").where("id_sd_pai", "==", marcador_pai.id).get()
+    _ApiPesquisarCTOsPeloIdDoSdPai(marcador_pai.id) 
         .then((querySnapshot) =>{
             var listaAux = []
             querySnapshot.forEach((doc) => {               

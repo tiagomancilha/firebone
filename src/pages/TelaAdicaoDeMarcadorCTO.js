@@ -3,7 +3,13 @@ import React,{useEffect, useState, useRef} from 'react';
 
 import { Text, View, Button, TextInput, StyleSheet, TouchableOpacity, ScrollView, Picker, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '../api/firebase'
+import firebase, {
+    _ApiPesquisarListaDeCidades,
+     _ApiPesquisarGruposPeloTipo,
+      _ApiAdicionarCto,
+      _ApiPesquisarGruposPorTipoECidade,
+      _ApiPesquisarSdsPeloIdDoGrupoPai
+    } from '../api/firebase'
 
 const NUMERO_MAXIMO_DE_SDS_POR_GRUPO = 60
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +59,7 @@ export default function TelaAdicaoDeMarcadorCTO({route, navigation}) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
     const getListaDeCidadesDoBD = async () =>{
-            firebase.firestore().collection("cidades").get()
+            _ApiPesquisarListaDeCidades()
             .then((querySnapshot) =>{
                 var listaAux = []
                 querySnapshot.forEach((doc) => {               
@@ -101,7 +107,7 @@ function mudarNomeDaCTO(novoNome){
 ///////////////////////////////////////////////////////////////////////////////////////////////////
     const getGruposDeSDs = async () =>{
         
-        firebase.firestore().collection("grupos").where("tipo", "==", "GRUPO(SDS)").get()
+        _ApiPesquisarGruposPeloTipo("GRUPO(SDS)")
         .then((querySnapshot) =>{
             var listaAux = []
             querySnapshot.forEach((doc) => {               
@@ -140,7 +146,7 @@ function mudarNomeDaCTO(novoNome){
             {
                 text: 'Sim',
                 onPress : () => {
-                    firebase.firestore().collection("ctos").add(marcador).then((docRef) =>{ 
+                    _ApiAdicionarCto.then((docRef) =>{ 
                         setGravando(false)
                         Alert.alert("CTO " + nome +  " cadastrada com sucesso")
                         marcador.id = docRef.id
@@ -171,16 +177,16 @@ async function carregarPickers() {
     //setCarregandoCidades(true)
     setCarregandoGrupos(true)
     setCarregandoSDs(true)
-    await firebase.firestore().collection("cidades").get()
-    .then((queryCidades) =>{
-        var listaCidades = []
-        queryCidades.forEach((doc) => {               
-            var cidade = doc.data()
-            cidade.id = doc.id                       
-            listaCidades.push(cidade)
-        })
-        setListaDeCidades(listaCidades) 
-        setCarregandoCidades(false)
+    await _ApiPesquisarListaDeCidades()
+        .then((queryCidades) =>{
+            var listaCidades = []
+            queryCidades.forEach((doc) => {               
+                var cidade = doc.data()
+                cidade.id = doc.id                       
+                listaCidades.push(cidade)
+            })
+            setListaDeCidades(listaCidades) 
+            setCarregandoCidades(false)
         try {
             const cidadeStored =  AsyncStorage.getItem('NOME_DA_CIDADE_DA_TELA_ADICAO_DE_CTO')
             console.log("Cidade gravada anteriormente:" + cidadeStored)
@@ -189,7 +195,7 @@ async function carregarPickers() {
                 cidade = cidadeStored
             }
             setCidadeSelecionada(cidade)
-                firebase.firestore().collection("grupos").where("tipo", "==", "GRUPO(SDS)").where("cidadeDeOrigem", "==", cidade).get()
+            _ApiPesquisarGruposPorTipoECidade( "GRUPO(SDS)", cidade)
                 .then((queryGrupos) =>{
                     var listaGrupos = []
                     queryGrupos.forEach((doc) => {               
@@ -202,8 +208,7 @@ async function carregarPickers() {
                     setGrupoSelecionado(listaDeGrupos[0]) 
                     setCarregandoGrupos(false)
                     var listaAux = []
-                   
-                    firebase.firestore().collection("ceos").where("id_grupo_pai", "==", listaDeGrupos[itemIndex].id).where("tipo","==","SD").get()
+                   _ApiPesquisarSdsPeloIdDoGrupoPai(listaDeGrupos[itemIndex].id)
                     .then((query) =>{
                         query.forEach((doc) => {               
                             var dados = doc.data()

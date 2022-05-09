@@ -1,5 +1,5 @@
 import React,{  useContext, useEffect, useState, useRef }  from 'react'
-import { StyleSheet, Share, Vibration, ActivityIndicator,  View, Text, TextInput, Dimensions, PermissionsAndroid, SafeAreaView, FlatList, TouchableWithoutFeedback, Alert , Modal, Pressable} from 'react-native';
+import { StyleSheet, Share, Vibration, ActivityIndicator, Animated,  View, Text, TextInput, Dimensions, PermissionsAndroid, SafeAreaView, FlatList, TouchableWithoutFeedback, Alert , Modal, Pressable} from 'react-native';
 import {Picker} from '@react-native-picker/picker'
 import { MaterialIcons } from '@expo/vector-icons'
 import ModalSelecionarTipoDeMarcador from '../components/ModalSelecionarTipoDeMarcador';
@@ -17,6 +17,8 @@ const width  = Dimensions.get('window').width
 var medicaoTotal = 0
 
 export default function MapaPrincipal({navigation}) {
+
+    const [posicaoDoBotaoCancelarMarcadorDaMedicao, setPosicaoDoBotaoCancelarMarcadorDaMedicao ] = useState(new Animated.Value(0))
     const [modo, setModo] = useState('INICIO')
     const [modalSelecionarTipoDeMarcador, setModalSelecionarTipoDeMarcador] = useState(false)
     const [showModalDePesquisa, setShowModalDePesquisa] = useState(false)
@@ -174,6 +176,16 @@ async function compartilharMarcador(marcador){
       
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+function mostrarBotaoCancelarMarcadorDeMedicao(mostrar){
+
+    Animated.timing(this.state.xPosition, {
+        toValue: 100,
+        easing: Easing.back(),
+        duration: 2000
+    }).start();
+}
  
 
 
@@ -233,7 +245,7 @@ useEffect(()=>{
 
                 {listaDeCTOsSendoMostradas.length > 0 &&
                     listaDeCTOsSendoMostradas.map((marcador, index) =>{
-                        return <CTO key={index} marcador={marcador} clicouNoMarcador={clicouNoMarcador}/>
+                         return <CTO key={index} marcador={marcador} clicouNoMarcador={clicouNoMarcador}/>
                     })
                 }
 
@@ -310,9 +322,9 @@ useEffect(()=>{
                     }
                     setListaDePostesDaMedicao(lista)       
             }}>
-                <View style={styles.fabVoltarLanceDaMedicao}>
+                <Animated.View style={styles.fabVoltarLanceDaMedicao}>
                     <MaterialIcons name="undo" size={36} color="#aaa"/>
-                </View>
+                </Animated.View>
             </TouchableWithoutFeedback>
         }
 
@@ -400,6 +412,7 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 30,
         backgroundColor: "#254048",
+        right: posicaoDoBotaoCancelarMarcadorDaMedicao,
         bottom: 200,
         right: 15
     },
